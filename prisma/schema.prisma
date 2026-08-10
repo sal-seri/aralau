@@ -1,0 +1,81 @@
+// Prisma schema for aralau.
+// The stamp is derived from a check-in: one check-in per user per location
+// is enforced by @@unique([userId, locationId]) on CheckIn.
+// `answers` holds normalized answer variants and is NEVER sent to the client.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SeasonStatus {
+  draft
+  active
+  closed
+  frozen
+}
+
+model User {
+  id        String   @id @default(cuid())
+  handle    String   @unique
+  email     String   @unique
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+
+  checkIns CheckIn[]
+}
+
+model Season {
+  id        String       @id @default(cuid())
+  slug      String       @unique
+  title     String
+  status    SeasonStatus @default(draft)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  order     Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  locations Location[]
+}
+
+model Location {
+  id          String       @id @default(cuid())
+  seasonId    String
+  season      Season       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  slug        String
+  title       String
+  orientText  String       @db.Text
+  storyText   String?      @db.Text
+  question    String       @db.Text
+  answers     Json
+  order       Int          @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  checkIns CheckIn[]
+
+  @@unique([seasonId, slug])
+}
+
+model CheckIn {
+  id         String   @id @default(cuid())
+  userId     String
+  locationId String
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, locationId])
+}
