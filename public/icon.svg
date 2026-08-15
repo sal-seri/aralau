@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Aralau placeholder: stamp-circle motif, ink on paper -->
+  <rect width="512" height="512" fill="#F4EFE6"/>
+  <!-- perforated outer ring (48 dots) -->
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#211D18" stroke-width="10" stroke-linecap="round" stroke-dasharray="1.2 24.4563"/>
+  <!-- inner ring -->
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#211D18" stroke-width="8"/>
+  <!-- stamped A -->
+  <path d="M186 328 L256 178 L326 328" fill="none" stroke="#B3392C" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M224 284 L288 284" fill="none" stroke="#B3392C" stroke-width="22" stroke-linecap="round"/>
+</svg>
