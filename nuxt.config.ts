@@ -14,6 +14,11 @@ export default defineNuxtConfig({
     '@fontsource/pt-sans/700.css'
   ],
   runtimeConfig: {
+    // Public base URL used for absolute og:image references.
+    // Override locally with NUXT_PUBLIC_SITE_URL=http://localhost:3000
+    public: {
+      siteUrl: 'https://aralau.kz'
+    },
     // nuxt-auth-utils sealed-cookie session.
     // h3 cookie defaults: httpOnly + secure + path '/'; SameSite set to lax here.
     // NUXT_SESSION_PASSWORD is injected from the environment automatically.

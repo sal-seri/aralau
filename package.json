@@ -18,7 +18,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
-    "prisma:reset": "prisma migrate reset"
+    "prisma:reset": "prisma migrate reset",
+    "og": "node scripts/generate-og.mjs"
   },
   "dependencies": {
     "@fontsource/pt-sans": "^5.3.0",
@@ -39,6 +40,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@expo-google-fonts/pt-serif": "^0.4.1",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26.2.0",
     "@types/pg": "^8.21.0",
     "@vite-pwa/assets-generator": "^1.0.2",
@@ -46,6 +49,7 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.6",
     "prisma": "^7.9.1",
+    "sharp": "^0.35.3",
     "tsx": "^4.23.12",
     "typescript": "^6.0.3",
     "vue-tsc": "^3.3.9"

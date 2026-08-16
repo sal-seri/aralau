@@ -7,39 +7,40 @@ const prisma = new PrismaClient({ adapter })
 
 // `answers` holds normalized variants (lowercased, trimmed). It is NEVER
 // sent to the client — server-side matching only.
+// `storyText` is locked post-check-in content — likewise never public.
 const demoLocations = [
   {
-    slug: 'harbor-gate',
-    title: 'The Harbor Gate',
+    slug: 'voznesenskiy-sobor',
+    title: 'Вознесенский собор',
     order: 1,
     orientText:
-      'You stand beneath the salt-stained stone of the old harbor gate, where fishermen once unloaded their catch before sunrise. Gulls still circle the keystone, waiting for scraps that no longer come.',
+      'В самом сердце старого города есть парк, где шум Кунаева стихает под старыми карагачами. В его глубине стоит здание, пережившее землетрясение, которое снесло почти весь город. Найдите его — и не смотрите на купола, пока не дойдёте до стен.',
     storyText:
-      'Built to defend the inner quay from storm-driven raiders, the Harbor Gate was the first structure commissioned when the town outgrew its walled core. The keystone was carved by a stonemason who signed their work with a single wavAmeasuring line.',
-    question: 'What four-digit year is engraved on the keystone above the gate?',
-    answers: ['1782', 'seventeen eighty-two']
+      'Вознесенский собор построен в начале XX века целиком из тянь-шаньской ели — без единого гвоздя в несущих узлах. В 1911 году он пережил катастрофическое землетрясение, согнувшее стальные конструкции города, и остался стоять. Его несколько раз разбирали до основания и собирали снова, как огромный конструктор.',
+    question: 'Из какого материала построены стены собора — присмотритесь к ним вблизи?',
+    answers: ['из дерева', 'дерево', 'деревянный', 'из ели', 'ель', 'тянь-шаньская ель']
   },
   {
-    slug: 'clocktower-square',
-    title: 'The Clocktower Square',
+    slug: 'zelenyy-bazar',
+    title: 'Зелёный базар',
     order: 2,
     orientText:
-      'The square opens around a brick clocktower whose bell has marked noon for two centuries. A sundial beside the door still keeps summer time, stubbornly an hour behind the tower itself.',
+      'Идите от собора вниз по пешеходной улице, пока воздух не изменится: специи, дыня, свежая рыба и сто голосов торговцев. Двухэтажное здание рынка старше большинства домов вокруг. Вход со стороны улицы Жибек Жолы, у входа — мемориальная доска.',
     storyText:
-      'The clocktower was funded by the merchant guild to regulate market hours. Its main clock has faces on every side of the tower so that no street in the square is without time.',
-    question: 'How many clock faces does the tower show from the square?',
-    answers: ['4', 'four']
+      'Зелёный базар стоит на этом месте с 1875 года, когда Верный был ещё деревянным городом на окраине империи. Здесь всегда торговали тем, что выросло за городом: яблоками с предгорий, мёдом с пасек Заилийского Алатау, кумысом из пригородных аулов. Двухэтажное здание в стиле советского модернизма скрывает под собой слои прежних рядов.',
+    question: 'Какой год высечен на мемориальной доске у входа на базар?',
+    answers: ['1875']
   },
   {
-    slug: 'starling-bridge',
-    title: 'The Starling Bridge',
+    slug: 'arbat-zhibek-zholy',
+    title: 'Арбат на Жибек Жолы',
     order: 3,
     orientText:
-      'A narrow stone bridge arches over the canal where, each spring, starlings gather at dusk and trace shivering shapes above the water. A green-patinaed bronze nymph stands at the rail, half-turned toward something you cannot see.',
+      'Пешеходная улица, которую горожане упрямо зовут Арбатом, начинается у базара и тянется вверх мимо художников, уличных музыкантов и бронзовых прохожих. Один из них застыл в шаге навсегда — четверо, с гитарами, у самого начала улицы.',
     storyText:
-      'The bridge dates to the grain-trade boom. The nymph at its center was cast as a ward against drowning; local custom is to brush her upheld hand as you cross.',
-    question: 'What does the bronze nymph hold in her raised hand?',
-    answers: ['a lantern', 'lantern']
+      'Шёлковый путь — Жибек Жолы — давал улице имя задолго до того, как она стала пешеходной. В 1980-х здесь прошла первая волна уличной торговли, в 1990-х — первые галереи. Бронзовая четвёрка появилась на улице в 2007 году и с тех пор собирает вокруг себя ежедневные толпы почитателей.',
+    question: 'Какая легендарная четвёрка музыкантов отлита в бронзе в начале улицы?',
+    answers: ['битлз', 'биттлз', 'the beatles', 'the beatles', 'ливерпульская четвёрка', 'ливерпульская четверка']
   }
 ]
 
@@ -47,20 +48,24 @@ async function main() {
   console.info('Seeding…')
 
   const season = await prisma.season.upsert({
-    where: { slug: 'demo' },
+    where: { slug: 'pervyy-sloy' },
     update: {
-      title: 'Discover Old Town',
+      title: 'Первый слой',
+      description:
+        'Первый сезон Aralau — места, которые город прячет на виду. Деревянный собор, старейший рынок, пешеходная улица с бронзовыми прохожими: ищите детали, на которые никто не смотрит, и собирайте первые оттиски в паспорт сезона.',
       status: 'active',
-      startsAt: new Date('2026-01-01T00:00:00Z'),
-      endsAt: null,
+      startsAt: new Date('2026-03-01T00:00:00Z'),
+      endsAt: new Date('2026-12-31T23:59:59Z'),
       order: 0
     },
     create: {
-      slug: 'demo',
-      title: 'Discover Old Town',
+      slug: 'pervyy-sloy',
+      title: 'Первый слой',
+      description:
+        'Первый сезон Aralau — места, которые город прячет на виду. Деревянный собор, старейший рынок, пешеходная улица с бронзовыми прохожими: ищите детали, на которые никто не смотрит, и собирайте первые оттиски в паспорт сезона.',
       status: 'active',
-      startsAt: new Date('2026-01-01T00:00:00Z'),
-      endsAt: null,
+      startsAt: new Date('2026-03-01T00:00:00Z'),
+      endsAt: new Date('2026-12-31T23:59:59Z'),
       order: 0
     }
   })

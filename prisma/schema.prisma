@@ -51,33 +51,34 @@ model OAuthAccount {
 }
 
 model Season {
-  id        String       @id @default(cuid())
-  slug      String       @unique
-  title     String
-  status    SeasonStatus @default(draft)
-  startsAt  DateTime?
-  endsAt    DateTime?
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  description String?
+  status      SeasonStatus @default(draft)
+  startsAt    DateTime?
+  endsAt      DateTime?
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   locations Location[]
 }
 
 model Location {
-  id          String       @id @default(cuid())
+  id          String    @id @default(cuid())
   seasonId    String
-  season      Season       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  season      Season    @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   slug        String
   title       String
-  orientText  String       @db.Text
-  storyText   String?      @db.Text
-  question    String       @db.Text
+  orientText  String    @db.Text
+  storyText   String?   @db.Text
+  question    String    @db.Text
   answers     Json
-  order       Int          @default(0)
+  order       Int       @default(0)
   publishedAt DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   checkIns CheckIn[]
 

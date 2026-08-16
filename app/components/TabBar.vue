@@ -21,9 +21,9 @@ const tabs = computed(() => [
         v-for="tab in tabs"
         :key="tab.to"
         :to="tab.to"
-        :aria-current="route.path === tab.to ? 'page' : undefined"
+        :aria-current="route.path.startsWith(tab.to) ? 'page' : undefined"
         class="flex min-h-[44px] flex-col items-center justify-center gap-1 py-2 text-[11px] font-bold"
-        :class="route.path === tab.to ? 'text-accent' : 'text-ink-soft'"
+        :class="route.path.startsWith(tab.to) ? 'text-accent' : 'text-ink-soft'"
       >
         <component :is="tab.icon" class="size-5" aria-hidden="true" />
         <span>{{ tab.label }}</span>
