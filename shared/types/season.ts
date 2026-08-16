@@ -30,3 +30,12 @@ export interface SeasonDetail {
   endsAt: string | null
   locations: SeasonLocationItem[]
 }
+
+// Per-user check-in entry for the current viewer inside one season.
+// Returned by `/api/me/checkins?season=<slug>` — never embedded in the
+// public season payload, so the season's SSR HTML stays anonymous-identical
+// and cacheable. `checkedInAt` is an ISO 8601 string (server-absolute instant).
+export interface SeasonCheckIn {
+  locationSlug: string
+  checkedInAt: string
+}

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import type { SeasonDetail } from '#shared/types/season'
+import type { SeasonCheckIn, SeasonDetail } from '#shared/types/season'
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 const route = useRoute()
+const { loggedIn } = useUserSession()
 
 const slug = computed(() => String(route.params.slug))
 
@@ -23,6 +25,29 @@ if (error.value || !season.value) {
 const range = computed(() =>
   formatSeasonRange(season.value?.startsAt ?? null, season.value?.endsAt ?? null, locale.value)
 )
+
+// Per-user found badges — client-only, hydration-safe.
+//
+// `foundSlugs` starts empty on both server and client initial-render, so
+// the SSR HTML is anonymous-identical (no badge rendered) and matches the
+// client's first paint. Only `onMounted` — strictly client — fetches the
+// check-in list for signed-in users and populates the Set, which reactively
+// stamps the already-rendered items with «Найдено ✓». Anon visitors and a
+// curl'd page never reach this branch.
+const foundSlugs = ref<Set<string>>(new Set())
+
+onMounted(async () => {
+  if (!loggedIn.value || !season.value) return
+  try {
+    const checkins = await $fetch<SeasonCheckIn[]>('/api/me/checkins', {
+      query: { season: season.value.slug }
+    })
+    foundSlugs.value = new Set(checkins.map((c) => c.locationSlug))
+  } catch {
+    // 401/unexpected: silently leave badges blank. The page is anonymous-
+    // identical by design, so this never breaks hydration.
+  }
+})
 
 usePageSeo({
   title: () => season.value?.title ?? t('seasons.title'),
@@ -55,7 +80,18 @@ usePageSeo({
         <span class="w-7 shrink-0 font-serif text-sm tabular-nums text-ink-soft">
           {{ String(i + 1).padStart(2, '0') }}
         </span>
-        <span class="font-serif text-ink">{{ location.title }}</span>
+        <NuxtLink
+          :to="localePath(`/places/${location.slug}`)"
+          class="font-serif text-ink transition-colors hover:text-accent"
+        >
+          {{ location.title }}
+        </NuxtLink>
+        <span
+          v-if="foundSlugs.has(location.slug)"
+          class="ml-auto text-xs font-bold uppercase tracking-wider text-ink-soft"
+        >
+          {{ t('season.foundMark') }}
+        </span>
       </li>
     </ol>
     <p v-else class="mt-3 text-ink-soft">{{ t('seasons.detail.empty') }}</p>

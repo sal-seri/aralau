@@ -37,7 +37,16 @@ export default defineNuxtConfig({
     dbName: process.env.DB_NAME ?? 'aralau'
   },
   routeRules: {
-    '/offline': { prerender: true }
+    '/offline': { prerender: true },
+    // The place HTML page embeds per-viewer content (storyText for found
+    // readers). The matching API route sets the same header on its own
+    // response; this rule mirrors it at the document layer so a shared
+    // cache can never replay one user's unlocked content to another.
+    // (Out-of-scope rule types like SSR `swr`/`isr` are intentionally not
+    // applied here — personalised HTML must always be re-fetched.)
+    '/places/**': {
+      headers: { 'Cache-Control': 'private, no-store', Vary: 'Cookie' }
+    }
   },
   nitro: {
     externals: {

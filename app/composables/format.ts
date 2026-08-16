@@ -48,3 +48,45 @@ export function formatSeasonRange(
 export function pluralForm(locale: string, n: number): PluralCategory {
   return new Intl.PluralRules(locale).select(n) as PluralCategory
 }
+
+const almatyDayMonthYearCache = new Map<string, Intl.DateTimeFormat>()
+
+// «12 марта 2026» — check-in date as the stamp would read in Almaty.
+//
+// `checkedInAt` arrives as an ISO 8601 string (server-absolute instant,
+// produced via `.toISOString()` on the API). We format the calendar day
+// in `Asia/Almaty` because the visible "Найдено · …" date is emotionally
+// tied to the stamp date a user would have walked away with — a guest
+// visiting from another zone must not see a different calendar day
+// because their browser happened to be in UTC+0. (Almaty has been
+// permanently UTC+05:00 since the December 2024 Kazakhstan reform; we
+// simply forward the IANA zone name and let the platform ICU decide.)
+//
+// `formatToParts` (rather than `format`) so we emit «12 марта 2026»
+// exactly, without the «г.» suffix Node's full ICU appends to
+// `Intl.DateTimeFormat('ru', { day, month, year }).format()`.
+//
+// Deterministic server/client output (same ISO in → same string out)
+// means no hydration mismatch on the found-date block.
+export function formatCheckedInDate(checkedInAt: string, locale: string): string {
+  let formatter = almatyDayMonthYearCache.get(locale)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'Asia/Almaty'
+    })
+    almatyDayMonthYearCache.set(locale, formatter)
+  }
+
+  let day = ''
+  let month = ''
+  let year = ''
+  for (const part of formatter.formatToParts(new Date(checkedInAt))) {
+    if (part.type === 'day') day = part.value
+    else if (part.type === 'month') month = part.value
+    else if (part.type === 'year') year = part.value
+  }
+  return `${day} ${month} ${year}`
+}
