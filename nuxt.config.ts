@@ -79,14 +79,21 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      navigateFallback: '/offline',
-      navigateFallbackDenylist: [/^\/api/],
       globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,json}'],
       cleanupOutdatedCaches: true,
       runtimeCaching: [
         {
           urlPattern: '/api/',
           handler: 'NetworkOnly'
+        },
+        {
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkOnly',
+          options: {
+            precacheFallback: {
+              fallbackURL: '/offline'
+            }
+          }
         }
       ]
     },
