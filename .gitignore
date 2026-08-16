@@ -25,3 +25,6 @@ logs
 
 # Prisma generated client
 generated/prisma
+
+# vue-tsc artifacts
+*.vue.js

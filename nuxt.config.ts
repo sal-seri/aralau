@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss', '@nuxt/eslint', '@vite-pwa/nuxt', '@nuxtjs/i18n'],
+  modules: ['@nuxtjs/tailwindcss', '@nuxt/eslint', '@vite-pwa/nuxt', '@nuxtjs/i18n', 'nuxt-auth-utils'],
   tailwindcss: {
     cssPath: '~/assets/css/tailwind.css'
   },
@@ -14,6 +14,17 @@ export default defineNuxtConfig({
     '@fontsource/pt-sans/700.css'
   ],
   runtimeConfig: {
+    // nuxt-auth-utils sealed-cookie session.
+    // h3 cookie defaults: httpOnly + secure + path '/'; SameSite set to lax here.
+    // NUXT_SESSION_PASSWORD is injected from the environment automatically.
+    session: {
+      name: 'aralau-session',
+      // 30 days — a PWA relaunch must keep the user signed in.
+      maxAge: 60 * 60 * 24 * 30,
+      cookie: {
+        sameSite: 'lax'
+      }
+    },
     dbHost: process.env.DB_HOST ?? '127.0.0.1',
     dbPort: process.env.DB_PORT ?? '5432',
     dbUser: process.env.DB_USER ?? 'aralau',
@@ -22,6 +33,13 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/offline': { prerender: true }
+  },
+  nitro: {
+    externals: {
+      // Bundle the generated Prisma client into the server build; left
+      // external, its relative import breaks inside prerender workers.
+      inline: [/generated[\\/]prisma/]
+    }
   },
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
