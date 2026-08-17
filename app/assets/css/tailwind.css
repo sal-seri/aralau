@@ -31,6 +31,33 @@
       transparent 1px 4px
     );
   }
+
+  /* Almanac book prose: Literata, justified, hyphenated. */
+  .prose-book {
+    @apply font-serif text-ink-body;
+    font-size: 15px;
+    line-height: 1.72;
+    text-align: justify;
+    hyphens: auto;
+    text-wrap: pretty;
+  }
+
+  /* Smaller muted companion paragraph (directions, notes). */
+  .prose-book--small {
+    @apply text-muted;
+    font-size: 13.5px;
+    line-height: 1.7;
+    text-align: start;
+  }
+
+  /* Raised accent initial for the opening paragraph of a section. */
+  .dropcap::first-letter {
+    float: left;
+    font-size: 42px;
+    line-height: 0.88;
+    padding: 3px 8px 0 0;
+    color: theme('colors.accent');
+  }
 }
 
 .page-enter-active,

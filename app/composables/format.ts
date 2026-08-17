@@ -49,6 +49,30 @@ export function pluralForm(locale: string, n: number): PluralCategory {
   return new Intl.PluralRules(locale).select(n) as PluralCategory
 }
 
+// Lowercase roman numeral for season/place ordinals («i», «ii», «iii»…).
+// Supports 1–20 — beyond the three seasons and nine places a volume holds.
+export function toRoman(n: number): string {
+  if (!Number.isInteger(n) || n < 1 || n > 20) {
+    throw new RangeError(`toRoman expects an integer 1–20, received ${n}`)
+  }
+  const glyphs: ReadonlyArray<readonly [number, string]> = [
+    [10, 'x'],
+    [9, 'ix'],
+    [5, 'v'],
+    [4, 'iv'],
+    [1, 'i']
+  ]
+  let rest = n
+  let out = ''
+  for (const [value, glyph] of glyphs) {
+    while (rest >= value) {
+      out += glyph
+      rest -= value
+    }
+  }
+  return out
+}
+
 const almatyDayMonthYearCache = new Map<string, Intl.DateTimeFormat>()
 
 // «12 марта 2026» — check-in date as the stamp would read in Almaty.
