@@ -45,6 +45,97 @@ const demoLocations = [
   }
 ]
 
+// Seasons ii–iii exist as `draft` so the title page TOC shows locked rows
+// («жабық») and the «мөрлер» row reads against the full 9-place volume.
+// Their places are published (countable) but NEVER exposed while draft —
+// /api/seasons redacts everything but the row's existence and order.
+const upcomingSeasons = [
+  {
+    slug: 'tereptik',
+    title: 'Тереңдік',
+    description:
+      'Второй сезон Aralau — город под городом: метро, подземные реки и ходы, о которых не пишут в путеводителях.',
+    order: 1,
+    locations: [
+      {
+        slug: 'almaty-metro',
+        title: 'Метрополитен',
+        order: 1,
+        orientText:
+          'Спуститесь туда, где город звучит гулче всего. Самая глубокая станция — не первая по пути: считайте пролёты, а не станции.',
+        storyText:
+          'Алматинский метрополитен открылся в 2011 году и стал первым в Казахстане. Станции «Алабай» и «Жибек Жолы» скрывают под толщей грунта полноценные архитектурные сюжеты — от национальных орнаментов до витражей о Шёлковом пути.',
+        question: 'Какой зверь дал имя самой глубокой станции первой очереди?',
+        answers: ['барс', 'снежный барс', 'алабай']
+      },
+      {
+        slug: 'podzemnaya-almatinka',
+        title: 'Подземная Алматинка',
+        order: 2,
+        orientText:
+          'Река, которую город заперло в бетон на большей части пути. Найдите место, где её слышно, но не видно.',
+        storyText:
+          'Большая Алматинка проложена под городом в бетонном коллекторе ещё в советские годы — горные паводки требовали жёсткого русла. Коллектор стал второй, подземной рекой Алматы: её шум прорывается сквозь люки и решётки в самые неожиданные кварталы.',
+        question: 'Как называется река, текущая под городом в бетонном русле?',
+        answers: ['алматинка', 'большая алматинка']
+      },
+      {
+        slug: 'teplyy-trakt',
+        title: 'Тёплый тракт',
+        order: 3,
+        orientText:
+          'Зимой над одним из пешеходных переходов не тает снег, а над соседним — тает. Найдите тёплую линию под ногами.',
+        storyText:
+          'Теплотрассы Алматы — это ещё одна карта города: там, где под асфальтом идёт горячая нитка, снег сходит первым, а тополя стоят выше. Монтажники называют эти линии «тёплыми трактами»; для внимательного прохожего они читаются без всякой карты.',
+        question: 'Что выдаёт прохожему линию теплотрассы зимой?',
+        answers: ['снег', 'снег тает', 'растаявший снег', 'отсутствие снега']
+      }
+    ]
+  },
+  {
+    slug: 'astar',
+    title: 'Астар',
+    description:
+      'Третий сезон Aralau — изнанка города: дворы-колодцы, парадные и лестницы, куда ведут двери без вывесок.',
+    order: 2,
+    locations: [
+      {
+        slug: 'dom-na-vzletnoy',
+        title: 'Дом на Взлётной',
+        order: 1,
+        orientText:
+          'Район, где улицы названы в честь неба, держит на земле один из самых странных дворов города. Войдите со стороны солнца.',
+        storyText:
+          'Жилые кварталы у Взлётной строились для лётчиков и инженеров, и дворы здесь проектировали как сады: внутренние аллеи, тополя, скамейки по кругу. Один такой двор сохранил планировку шестидесятых почти без изменений — редкость для города, который растёт вверх.',
+        question: 'Для кого строились кварталы у Взлётной улицы?',
+        answers: ['для лётчиков', 'лётчиков', 'летчиков', 'для летчиков']
+      },
+      {
+        slug: 'paradnaya-s-lepninoy',
+        title: 'Парадная с лепниной',
+        order: 2,
+        orientText:
+          'Найдите парадную, где лифт ездит мимо витража. Подсказка: дом стоит на углу, и вход — с боковой улицы.',
+        storyText:
+          'Угловые дома старого Алматы часто прятали лучшие двери со двора: парадные с лепниной и коваными перилами оставались невидимыми с магистрали. В одной из них лифт ходит вдоль застеклённой шахты — стеклянная стена смотрит прямо во двор.',
+        question: 'Что видит пассажир лифта через стену шахты?',
+        answers: ['двор', 'внутренний двор']
+      },
+      {
+        slug: 'lestnica-na-belaya',
+        title: 'Лестница на Белая',
+        order: 3,
+        orientText:
+          'Улица уходит вверх круче, чем кажется. Между двумя домами есть ступени, которых нет на картах — их проложили жильцы.',
+        storyText:
+          'Народные лестницы — стихия предгорного Алматы: когда уклон больше трёх градусов, жильцы сами бетонируют ступени. Эти переходы не числятся ни на одной карте, но связывают кварталы короче любых дорог — и каждая лестница помнит руку своих строителей.',
+        question: 'Кто проложил лестницу между двумя домами?',
+        answers: ['жильцы', 'жители', 'соседи']
+      }
+    ]
+  }
+]
+
 async function main() {
   console.info('Seeding…')
 
@@ -95,6 +186,57 @@ async function main() {
         publishedAt: new Date()
       }
     })
+  }
+
+  // Seasons ii–iii: `draft`, places published (countable in progress
+  // totals) — idempotent upserts, statuses never flip via re-seeding.
+  for (const upcoming of upcomingSeasons) {
+    const draftSeason = await prisma.season.upsert({
+      where: { slug: upcoming.slug },
+      update: {
+        title: upcoming.title,
+        description: upcoming.description,
+        status: 'draft',
+        startsAt: null,
+        endsAt: null,
+        order: upcoming.order
+      },
+      create: {
+        slug: upcoming.slug,
+        title: upcoming.title,
+        description: upcoming.description,
+        status: 'draft',
+        startsAt: null,
+        endsAt: null,
+        order: upcoming.order
+      }
+    })
+
+    for (const loc of upcoming.locations) {
+      await prisma.location.upsert({
+        where: { seasonId_slug: { seasonId: draftSeason.id, slug: loc.slug } },
+        update: {
+          title: loc.title,
+          orientText: loc.orientText,
+          storyText: loc.storyText,
+          question: loc.question,
+          answers: loc.answers,
+          order: loc.order,
+          publishedAt: new Date()
+        },
+        create: {
+          seasonId: draftSeason.id,
+          slug: loc.slug,
+          title: loc.title,
+          orientText: loc.orientText,
+          storyText: loc.storyText,
+          question: loc.question,
+          answers: loc.answers,
+          order: loc.order,
+          publishedAt: new Date()
+        }
+      })
+    }
   }
 
   // Demo check-ins for the developer's Google account (SEED_DEMO_USER_EMAIL):
@@ -150,7 +292,9 @@ async function main() {
     console.info('SEED_DEMO_USER_EMAIL is not set — skipping demo check-ins.')
   }
 
-  console.info(`Seeded season "${season.slug}" with ${demoLocations.length} locations.`)
+  console.info(
+    `Seeded season "${season.slug}" with ${demoLocations.length} locations and ${upcomingSeasons.length} upcoming draft seasons.`
+  )
 }
 
 main()

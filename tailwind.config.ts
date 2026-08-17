@@ -21,6 +21,7 @@ export default <Partial<Config>>{
         accent: '#9A4236',
         muted: '#6E6553',
         faint: '#8A7F66',
+        tagline: '#453E32',
         placeholder: '#9B917C',
         line: {
           soft: 'rgba(34, 30, 23, 0.12)',

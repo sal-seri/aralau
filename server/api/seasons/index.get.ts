@@ -1,14 +1,16 @@
 // Public season list — anonymous, cacheable, SEO-consumed.
-// Only `active | closed | frozen` seasons are exposed; `draft` never appears.
+// Every season appears (the book's TOC shows upcoming volumes as locked
+// rows), but `draft` seasons are REDACTED: only `order` is real; slug,
+// title, description, dates and the place count are nulled so nothing
+// about an unpublished season leaks. Visible seasons are unchanged.
 // Explicit `select` keeps answers/question/storyText out of the payload.
-import type { PublicSeasonStatus, SeasonListItem } from '~~/shared/types/season'
+import type { PublicSeasonStatus, SeasonDraftItem, SeasonTocEntry } from '~~/shared/types/season'
 import { prisma } from '../../db'
 
-export default defineEventHandler(async (): Promise<SeasonListItem[]> => {
+export default defineEventHandler(async (): Promise<SeasonTocEntry[]> => {
   const now = new Date()
 
   const seasons = await prisma.season.findMany({
-    where: { status: { in: ['active', 'closed', 'frozen'] } },
     orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
     select: {
       slug: true,
@@ -17,6 +19,7 @@ export default defineEventHandler(async (): Promise<SeasonListItem[]> => {
       status: true,
       startsAt: true,
       endsAt: true,
+      order: true,
       _count: {
         select: {
           locations: { where: { publishedAt: { lte: now } } }
@@ -25,14 +28,29 @@ export default defineEventHandler(async (): Promise<SeasonListItem[]> => {
     }
   })
 
-  return seasons.map((season) => ({
-    slug: season.slug,
-    title: season.title,
-    description: season.description,
-    // narrowed by the where-clause above ('draft' can never reach here)
-    status: season.status as PublicSeasonStatus,
-    startsAt: season.startsAt?.toISOString() ?? null,
-    endsAt: season.endsAt?.toISOString() ?? null,
-    locationCount: season._count.locations
-  }))
+  return seasons.map((season): SeasonTocEntry => {
+    if (season.status === 'draft') {
+      const redacted: SeasonDraftItem = {
+        order: season.order,
+        status: 'draft',
+        slug: null,
+        title: null,
+        description: null,
+        startsAt: null,
+        endsAt: null,
+        locationCount: null
+      }
+      return redacted
+    }
+    return {
+      slug: season.slug,
+      title: season.title,
+      description: season.description,
+      // narrowed by the branch above ('draft' never reaches here)
+      status: season.status as PublicSeasonStatus,
+      startsAt: season.startsAt?.toISOString() ?? null,
+      endsAt: season.endsAt?.toISOString() ?? null,
+      locationCount: season._count.locations
+    }
+  })
 })

@@ -73,7 +73,44 @@ export function toRoman(n: number): string {
   return out
 }
 
-const almatyDayMonthYearCache = new Map<string, Intl.DateTimeFormat>()
+const almatyDayMonthCache = new Map<string, Intl.DateTimeFormat>()
+
+// «4 мая» / «4 мамыр» — completing-stamp date for TOC meta («3 / 3 · 4 мая»).
+// Same Asia/Almaty + formatToParts discipline as formatCheckedInDate
+// (deterministic across server/client, no locale-specific suffixes).
+export function formatStampDayMonth(iso: string, locale: string): string {
+  let formatter = almatyDayMonthCache.get(locale)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      timeZone: 'Asia/Almaty'
+    })
+    almatyDayMonthCache.set(locale, formatter)
+  }
+
+  let day = ''
+  let month = ''
+  for (const part of formatter.formatToParts(new Date(iso))) {
+    if (part.type === 'day') day = part.value
+    else if (part.type === 'month') month = part.value
+  }
+  return `${day} ${month}`
+}
+
+// Volume year for the spine («Том I · Алматы · 2026»): the year the
+// earliest visible season starts (endsAt as a fallback for startless
+// seasons), else the current year.
+export function volumeYear(
+  visible: { startsAt: string | null; endsAt: string | null }[],
+  fallback = new Date().getFullYear()
+): number {
+  const first = visible[0]
+  if (!first) return fallback
+  if (first.startsAt) return new Date(first.startsAt).getUTCFullYear()
+  if (first.endsAt) return new Date(first.endsAt).getUTCFullYear()
+  return fallback
+}
 
 // «12 марта 2026» — check-in date as the stamp would read in Almaty.
 //
@@ -92,6 +129,8 @@ const almatyDayMonthYearCache = new Map<string, Intl.DateTimeFormat>()
 //
 // Deterministic server/client output (same ISO in → same string out)
 // means no hydration mismatch on the found-date block.
+const almatyDayMonthYearCache = new Map<string, Intl.DateTimeFormat>()
+
 export function formatCheckedInDate(checkedInAt: string, locale: string): string {
   let formatter = almatyDayMonthYearCache.get(locale)
   if (!formatter) {
