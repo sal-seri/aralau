@@ -91,6 +91,15 @@ model CheckIn {
   locationId String
   createdAt  DateTime @default(now())
 
+  // Stamp placement on the season's stamp sheet (CSS px in the 346px-wide
+  // content column, 104px stamp). Computed ONCE at check-in creation and
+  // immutable afterwards — see server/utils/stampPlacement.ts. Nullable only
+  // for legacy/seed rows without stored coords; the API resolves those
+  // deterministically, so such rows render identically forever.
+  stampLeft Float?
+  stampTop  Float?
+  stampRot  Float?
+
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 

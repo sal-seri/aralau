@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "CheckIn" ADD COLUMN     "stampLeft" DOUBLE PRECISION,
+ADD COLUMN     "stampRot" DOUBLE PRECISION,
+ADD COLUMN     "stampTop" DOUBLE PRECISION;

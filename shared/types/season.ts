@@ -31,6 +31,16 @@ export interface SeasonDetail {
   locations: SeasonLocationItem[]
 }
 
+// Stamp placement on the season's stamp sheet, CSS px (see
+// server/utils/stampPlacement.ts): computed once at check-in creation,
+// persisted, immutable. Always populated in API responses — null stored
+// coords are resolved deterministically server-side.
+export interface StampPlacement {
+  left: number
+  top: number
+  rot: number
+}
+
 // Per-user check-in entry for the current viewer inside one season.
 // Returned by `/api/me/checkins?season=<slug>` — never embedded in the
 // public season payload, so the season's SSR HTML stays anonymous-identical
@@ -38,4 +48,5 @@ export interface SeasonDetail {
 export interface SeasonCheckIn {
   locationSlug: string
   checkedInAt: string
+  stamp: StampPlacement
 }
