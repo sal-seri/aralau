@@ -28,3 +28,5 @@ generated/prisma
 
 # vue-tsc artifacts
 *.vue.js
+
+design

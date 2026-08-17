@@ -18,10 +18,10 @@ import sharp from 'sharp'
 const require = createRequire(import.meta.url)
 const rootDir = fileURLToPath(new URL('..', import.meta.url))
 
-const PAPER = '#F4EFE6'
-const INK = '#211D18'
-const INK_SOFT = '#6B6353'
-const ACCENT = '#B3392C'
+const PAPER = '#EBE3CE'
+const INK = '#221E17'
+const INK_SOFT = '#6E6553'
+const ACCENT = '#9A4236'
 
 const fontFiles = [
   require.resolve('@expo-google-fonts/pt-serif/700Bold/PTSerif_700Bold.ttf')

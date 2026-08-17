@@ -12,18 +12,29 @@ export default <Partial<Config>>{
   theme: {
     extend: {
       colors: {
-        paper: {
-          DEFAULT: '#F4EFE6',
-          dim: '#EAE3D4'
-        },
+        paper: '#EBE3CE',
+        'paper-input': '#F3EEDF',
         ink: {
-          DEFAULT: '#211D18',
-          soft: '#6B6353'
+          DEFAULT: '#221E17',
+          body: '#2B261E'
         },
-        accent: '#B3392C'
+        accent: '#9A4236',
+        muted: '#6E6553',
+        faint: '#8A7F66',
+        placeholder: '#9B917C',
+        line: {
+          soft: 'rgba(34, 30, 23, 0.12)',
+          DEFAULT: 'rgba(34, 30, 23, 0.18)',
+          strong: 'rgba(34, 30, 23, 0.4)'
+        },
+        // Deprecated aliases, removed in redesign sub-step 5.5.6.
+        'paper-dim': '#EAE3D4',
+        'ink-soft': '#6E6553'
       },
       fontFamily: {
-        serif: ['"PT Serif"', 'Georgia', '"Times New Roman"', 'serif'],
+        // JetBrains Mono lacks Kazakh Cyrillic glyphs (Ә Ң Һ Ұ Қ Ғ) — PT Mono covers them.
+        serif: ['"Literata Variable"', '"PT Serif"', 'Georgia', 'serif'],
+        mono: ['"JetBrains Mono Variable"', '"JetBrains Mono"', '"PT Mono"', 'ui-monospace', 'monospace'],
         sans: ['"PT Sans"', 'system-ui', 'Arial', 'sans-serif']
       }
     }

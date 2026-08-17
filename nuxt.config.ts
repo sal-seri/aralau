@@ -7,11 +7,15 @@ export default defineNuxtConfig({
     cssPath: '~/assets/css/tailwind.css'
   },
   css: [
+    '~/assets/css/fonts.css',
     '@fontsource/pt-serif/400.css',
     '@fontsource/pt-serif/700.css',
     '@fontsource/pt-serif/400-italic.css',
     '@fontsource/pt-sans/400.css',
-    '@fontsource/pt-sans/700.css'
+    '@fontsource/pt-sans/700.css',
+    '@fontsource/pt-mono/latin-400.css',
+    '@fontsource/pt-mono/cyrillic-400.css',
+    '@fontsource/pt-mono/cyrillic-ext-400.css'
   ],
   runtimeConfig: {
     // Public base URL used for absolute og:image references.
@@ -63,7 +67,7 @@ export default defineNuxtConfig({
         { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
-        { name: 'theme-color', content: '#211D18' }
+        { name: 'theme-color', content: '#221E17' }
       ],
       link: [{ rel: 'apple-touch-icon', href: '/apple-touch-icon-180x180.png' }]
     }
@@ -78,8 +82,8 @@ export default defineNuxtConfig({
       orientation: 'portrait',
       start_url: '/',
       scope: '/',
-      theme_color: '#211D18',
-      background_color: '#F4EFE6',
+      theme_color: '#221E17',
+      background_color: '#EBE3CE',
       icons: [
         { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
         { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },

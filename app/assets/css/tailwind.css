@@ -8,7 +8,7 @@
   }
 
   body {
-    @apply bg-paper font-sans text-ink antialiased;
+    @apply bg-paper paper-texture font-sans text-ink antialiased;
   }
 
   h1,
@@ -18,6 +18,18 @@
   h5,
   h6 {
     @apply font-serif;
+  }
+}
+
+@layer utilities {
+  /* Almanac paper texture: hairline ruling over the paper base color. */
+  .paper-texture {
+    @apply bg-paper;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(34, 30, 23, 0.02) 0 1px,
+      transparent 1px 4px
+    );
   }
 }
 
