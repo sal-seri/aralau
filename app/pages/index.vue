@@ -130,7 +130,7 @@ const tocRows = computed<TocRowView[]>(() => {
     const found = foundEntry?.found ?? 0
     let meta = `${found} / ${entry.locationCount}`
     if (foundEntry?.completedAt) {
-      meta += ` · ${formatStampDayMonth(foundEntry.completedAt, locale.value)}`
+      meta += ` · ${formatDayMonth(foundEntry.completedAt, locale.value)}`
     }
     return {
       numeral,

@@ -61,6 +61,54 @@
     },
     "foundMark": "Найдено ✓"
   },
+  "season": {
+    "backToToc": "← К содержанию",
+    "eyebrow": "Сезон {roman}",
+    "status": {
+      "active": "идёт",
+      "closed": "завершён"
+    },
+    "meta": {
+      "period": "срок",
+      "places": "места"
+    },
+    "sheet": {
+      "title": "Лист печатей",
+      "empty": "Лист пуст. Сюда упадёт первая печать.",
+      "captionProgress": {
+        "one": "{found} оттиск · {free}",
+        "few": "{found} оттиска · {free}",
+        "many": "{found} оттисков · {free}",
+        "other": "{found} оттисков · {free}"
+      },
+      "captionFree": {
+        "one": "{remaining} место свободно",
+        "few": "{remaining} места свободно",
+        "many": "{remaining} мест свободно",
+        "other": "{remaining} мест свободно"
+      },
+      "captionFull": {
+        "one": "{count} оттиск · лист заполнен",
+        "few": "{count} оттиска · лист заполнен",
+        "many": "{count} оттисков · лист заполнен",
+        "other": "{count} оттисков · лист заполнен"
+      }
+    },
+    "toc": "Содержание · места",
+    "emptySpot": "пусто",
+    "note": "Печать ставится только на месте, после ответа про деталь.",
+    "cta": {
+      "next": "Следующий сезон · {title}"
+    },
+    "spine": "Сезон {roman} · Алматы · {year}",
+    "spineClosed": "Сезон {roman} · {status} · {year}",
+    "footerUnit": "ед. хр. {unit}",
+    "footerUnitClosed": "ед. хр. {unit} · {status}",
+    "footerPage": "том I · бет 7"
+  },
+  "stamp": {
+    "ring": "ARALAU · АЛМАТЫ · СЕЗОН {season} · МЕСТО {place} ·"
+  },
   "places": {
     "backToSeason": "К сезону",
     "orientTitle": "Как найти",

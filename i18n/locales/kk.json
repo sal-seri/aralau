@@ -61,6 +61,54 @@
     },
     "foundMark": "Табылды ✓"
   },
+  "season": {
+    "backToToc": "← Мазмұнға оралу",
+    "eyebrow": "Маусым {roman}",
+    "status": {
+      "active": "жүруде",
+      "closed": "жабылды"
+    },
+    "meta": {
+      "period": "мерзімі",
+      "places": "орындар"
+    },
+    "sheet": {
+      "title": "Мөр парағы",
+      "empty": "Парақ бос. Бірінші мөр осында түседі.",
+      "captionProgress": {
+        "one": "{found} оттиск басылды · {free}",
+        "few": "{found} оттиск басылды · {free}",
+        "many": "{found} оттиск басылды · {free}",
+        "other": "{found} оттиск басылды · {free}"
+      },
+      "captionFree": {
+        "one": "{remaining} орын бос",
+        "few": "{remaining} орын бос",
+        "many": "{remaining} орын бос",
+        "other": "{remaining} орын бос"
+      },
+      "captionFull": {
+        "one": "{count} оттиск · парақ толды",
+        "few": "{count} оттиск · парақ толды",
+        "many": "{count} оттиск · парақ толды",
+        "other": "{count} оттиск · парақ толды"
+      }
+    },
+    "toc": "Мазмұны · орындар",
+    "emptySpot": "бос орын",
+    "note": "Мөр тек орында, детальға берілген жауаптан кейін басылады.",
+    "cta": {
+      "next": "Келесі маусым · {title}"
+    },
+    "spine": "Маусым {roman} · Алматы · {year}",
+    "spineClosed": "Маусым {roman} · {status} · {year}",
+    "footerUnit": "ед. хр. {unit}",
+    "footerUnitClosed": "ед. хр. {unit} · {status}",
+    "footerPage": "том I · бет 7"
+  },
+  "stamp": {
+    "ring": "ARALAU · АЛМАТЫ · МАУСЫМ {season} · ОРЫН {place} ·"
+  },
   "places": {
     "backToSeason": "Маусымға оралу",
     "orientTitle": "Қалай табуға болады",

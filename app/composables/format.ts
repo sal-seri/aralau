@@ -75,10 +75,11 @@ export function toRoman(n: number): string {
 
 const almatyDayMonthCache = new Map<string, Intl.DateTimeFormat>()
 
-// «4 мая» / «4 мамыр» — completing-stamp date for TOC meta («3 / 3 · 4 мая»).
+// «12 марта» / «12 наурыз» — day + genitive month name for the season TOC's
+// found rows and the title page's completing-stamp meta («3 / 3 · 4 мая»).
 // Same Asia/Almaty + formatToParts discipline as formatCheckedInDate
 // (deterministic across server/client, no locale-specific suffixes).
-export function formatStampDayMonth(iso: string, locale: string): string {
+export function formatDayMonth(date: string | Date, locale: string): string {
   let formatter = almatyDayMonthCache.get(locale)
   if (!formatter) {
     formatter = new Intl.DateTimeFormat(locale, {
@@ -91,11 +92,38 @@ export function formatStampDayMonth(iso: string, locale: string): string {
 
   let day = ''
   let month = ''
-  for (const part of formatter.formatToParts(new Date(iso))) {
+  for (const part of formatter.formatToParts(typeof date === 'string' ? new Date(date) : date)) {
     if (part.type === 'day') day = part.value
     else if (part.type === 'month') month = part.value
   }
   return `${day} ${month}`
+}
+
+// «12.03» — the dd.MM chip inside a stamp mark's hatch core. Two-digit day
+// and month of the ALMATY calendar day (the stamp date the reader walked
+// away with — same reasoning as formatCheckedInDate). formatToParts with a
+// structural locale so the joiner is exactly «.», never locale punctuation.
+const almatyStampDayCache = new Map<string, Intl.DateTimeFormat>()
+
+export function formatStampDay(date: string | Date): string {
+  const cacheKey = 'stamp-day'
+  let formatter = almatyStampDayCache.get(cacheKey)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      timeZone: 'Asia/Almaty'
+    })
+    almatyStampDayCache.set(cacheKey, formatter)
+  }
+
+  let day = ''
+  let month = ''
+  for (const part of formatter.formatToParts(typeof date === 'string' ? new Date(date) : date)) {
+    if (part.type === 'day') day = part.value
+    else if (part.type === 'month') month = part.value
+  }
+  return `${day}.${month}`
 }
 
 // Volume year for the spine («Том I · Алматы · 2026»): the year the
