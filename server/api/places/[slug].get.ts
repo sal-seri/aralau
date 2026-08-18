@@ -42,9 +42,11 @@ export default defineEventHandler(async (event): Promise<PlaceDetail> => {
       id: true,
       slug: true,
       title: true,
+      order: true,
       orientText: true,
       question: true,
       storyText: true,
+      seasonId: true,
       season: { select: { slug: true, title: true, status: true } }
     }
   })
@@ -71,9 +73,23 @@ export default defineEventHandler(async (event): Promise<PlaceDetail> => {
     }
   }
 
+  // Next published location of the same season by order (null when this
+  // place is the season's last). Published-only, mirroring the season
+  // TOC's ordering — an unpublished gap never becomes a dead link.
+  const nextLocation = await prisma.location.findFirst({
+    where: {
+      seasonId: location.seasonId,
+      publishedAt: { lte: now },
+      order: { gt: location.order }
+    },
+    orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+    select: { slug: true, order: true }
+  })
+
   const place: PlaceDetail = {
     slug: location.slug,
     title: location.title,
+    order: location.order,
     orientText: location.orientText,
     question: location.question,
     season: {
@@ -82,7 +98,8 @@ export default defineEventHandler(async (event): Promise<PlaceDetail> => {
       // narrowed by the where-clause above ('draft' can never reach here)
       status: location.season.status as PublicSeasonStatus
     },
-    viewer: { found, checkedInAt }
+    viewer: { found, checkedInAt },
+    nextPlace: nextLocation ? { slug: nextLocation.slug, order: nextLocation.order } : null
   }
 
   if (found) {

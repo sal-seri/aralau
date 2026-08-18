@@ -70,7 +70,7 @@ async function submit() {
   try {
     await $fetch('/api/auth/handle', { method: 'POST', body: { handle: handle.value } })
     await session.fetch()
-    await navigateTo(localePath('/seasons'))
+    await navigateTo(localePath('/'))
   } catch (error) {
     const reason = (error as { data?: { reason?: string } }).data?.reason
     serverError.value =
@@ -87,7 +87,7 @@ async function submit() {
   <section class="space-y-6">
     <div>
       <h1 class="text-2xl font-bold">{{ t('auth.onboarding.title') }}</h1>
-      <p class="mt-3 text-sm text-ink-soft">{{ t('auth.onboarding.hint') }}</p>
+      <p class="mt-3 text-sm text-muted">{{ t('auth.onboarding.hint') }}</p>
     </div>
 
     <form class="space-y-3" @submit.prevent="submit">
@@ -107,7 +107,7 @@ async function submit() {
       <p
         v-if="messageKey"
         class="text-sm"
-        :class="checkState === 'available' ? 'text-ink-soft' : 'text-accent'"
+        :class="checkState === 'available' ? 'text-muted' : 'text-accent'"
         aria-live="polite"
       >
         {{ t(messageKey) }}

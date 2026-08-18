@@ -39,7 +39,7 @@ const oauthError = computed(() => route.query.error === 'google')
     <a
       :href="googleDisabled ? undefined : googleUrl"
       :aria-disabled="googleDisabled || googleLoading ? 'true' : undefined"
-      class="flex min-h-[48px] w-full items-center justify-center rounded-lg border border-ink/20 bg-paper-dim px-4 text-sm font-bold text-ink transition-colors"
+      class="flex min-h-[48px] w-full items-center justify-center rounded-lg border border-ink/20 bg-paper-input px-4 text-sm font-bold text-ink transition-colors"
       :class="
         googleDisabled || googleLoading
           ? 'pointer-events-none cursor-not-allowed opacity-50'
@@ -49,7 +49,7 @@ const oauthError = computed(() => route.query.error === 'google')
       {{ t('auth.login.google') }}
     </a>
 
-    <p v-if="googleDisabled" class="text-center text-xs text-ink-soft">
+    <p v-if="googleDisabled" class="text-center text-xs text-muted">
       {{ t('auth.login.googleDisabled') }}
     </p>
   </section>

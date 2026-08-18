@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// Check-in form, self-contained so Step 6 only swaps the submit handler.
+// Check-in card (design 11d), self-contained so Step 6 only swaps the
+// submit handler.
 //
 // Two sibling modes share one markup:
 //   • `loggedIn === false` (the anonymous wall) — the question is shown,
@@ -49,32 +50,38 @@ function onSubmit() {
 </script>
 
 <template>
-  <form @submit.prevent="onSubmit">
-    <p class="leading-relaxed text-ink">{{ question }}</p>
+  <form class="mt-3.5 border-strong p-4" @submit.prevent="onSubmit">
+    <p class="text-pretty font-serif text-[16px] leading-[1.6] text-ink">
+      {{ question }}
+    </p>
 
     <input
       v-model="answer"
       type="text"
-      :placeholder="t('places.answerPlaceholder')"
+      :placeholder="t('place.answerPlaceholder')"
       autocomplete="off"
       autocapitalize="off"
       spellcheck="false"
-      class="mt-4 min-h-[48px] w-full rounded-lg border border-ink/20 bg-paper px-4 text-base text-ink focus:border-ink/50 focus:outline-none"
+      class="mt-3.5 min-h-[48px] w-full border border-[rgba(34,30,23,0.3)] bg-paper-input px-3.5 py-0 font-mono text-[12px] text-ink focus:border-[rgba(34,30,23,0.5)] focus:outline-none"
       @focus="onInputFocus"
     />
 
-    <button
-      type="submit"
-      class="mt-4 min-h-[48px] w-full rounded-lg bg-ink px-4 text-sm font-bold text-paper transition-opacity hover:opacity-90"
-    >
-      {{ t('places.submit') }}
-    </button>
-
-    <p v-if="!loggedIn" class="mt-3 text-sm text-ink-soft">
-      {{ t('places.loginToCheckin') }}
-    </p>
-    <p v-else-if="stubShown" class="mt-3 text-sm text-ink-soft" role="status">
-      {{ t('places.checkinSoon') }}
-    </p>
+    <!-- CtaButton renders type="button": the click handler covers mouse
+         activation, the form's submit covers Enter in the input. -->
+    <CtaButton class="mt-3" :label="t('place.submit')" @click="onSubmit" />
   </form>
+
+  <p
+    v-if="!loggedIn"
+    class="mt-3 text-pretty font-serif text-[13px] italic leading-[1.65] text-muted"
+  >
+    {{ t('place.loginToCheckin') }}
+  </p>
+  <p
+    v-else-if="stubShown"
+    role="status"
+    class="mt-3 text-pretty font-serif text-[13px] italic leading-[1.65] text-muted"
+  >
+    {{ t('place.checkinSoon') }}
+  </p>
 </template>

@@ -42,6 +42,13 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/offline': { prerender: true },
+    // Legacy Step 2–4 routes: the almanac title page replaced both the
+    // seasons list and the passport placeholder — permanent redirects
+    // keep old links (and the kk-prefixed variants) working.
+    '/seasons': { redirect: { to: '/', statusCode: 301 } },
+    '/passport': { redirect: { to: '/', statusCode: 301 } },
+    '/kk/seasons': { redirect: { to: '/kk', statusCode: 301 } },
+    '/kk/passport': { redirect: { to: '/kk', statusCode: 301 } },
     // The place HTML page embeds per-viewer content (storyText for found
     // readers). The matching API route sets the same header on its own
     // response; this rule mirrors it at the document layer so a shared

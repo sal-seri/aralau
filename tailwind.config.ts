@@ -27,10 +27,7 @@ export default <Partial<Config>>{
           soft: 'rgba(34, 30, 23, 0.12)',
           DEFAULT: 'rgba(34, 30, 23, 0.18)',
           strong: 'rgba(34, 30, 23, 0.4)'
-        },
-        // Deprecated aliases, removed in redesign sub-step 5.5.6.
-        'paper-dim': '#EAE3D4',
-        'ink-soft': '#6E6553'
+        }
       },
       fontFamily: {
         // JetBrains Mono lacks Kazakh Cyrillic glyphs (Ә Ң Һ Ұ Қ Ғ) — PT Mono covers them.

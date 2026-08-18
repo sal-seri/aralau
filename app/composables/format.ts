@@ -44,7 +44,8 @@ export function formatSeasonRange(
 }
 
 // Explicit plural category (ru: one/few/many) for i18n keys like
-// seasons.locations.one|few|many|other — deterministic across vue-i18n versions.
+// season.sheet.captionFull.one|few|many|other — deterministic across
+// vue-i18n versions.
 export function pluralForm(locale: string, n: number): PluralCategory {
   return new Intl.PluralRules(locale).select(n) as PluralCategory
 }
@@ -180,4 +181,37 @@ export function formatCheckedInDate(checkedInAt: string, locale: string): string
     else if (part.type === 'year') year = part.value
   }
   return `${day} ${month} ${year}`
+}
+
+// «12 марта 2026 · 14:20» — the found place's «мөр» row (11e): full
+// calendar date + clock time of the check-in as Almaty read it. Same
+// Asia/Almaty + formatToParts discipline as formatCheckedInDate
+// (deterministic server/client, no locale-specific «г.» suffixes or
+// day-period strings — hourCycle h23 emits a plain 24-hour «14:20»).
+const almatyStampDateTimeCache = new Map<string, Intl.DateTimeFormat>()
+
+export function formatStampDateTime(date: string | Date, locale: string): string {
+  let formatter = almatyStampDateTimeCache.get(locale)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+      timeZone: 'Asia/Almaty'
+    })
+    almatyStampDateTimeCache.set(locale, formatter)
+  }
+
+  const bag = new Map<string, string>()
+  for (const part of formatter.formatToParts(typeof date === 'string' ? new Date(date) : date)) {
+    if (part.type !== 'literal') bag.set(part.type, part.value)
+  }
+  const day = bag.get('day') ?? ''
+  const month = bag.get('month') ?? ''
+  const year = bag.get('year') ?? ''
+  const time = `${bag.get('hour') ?? ''}:${bag.get('minute') ?? ''}`
+  return `${day} ${month} ${year} · ${time}`
 }

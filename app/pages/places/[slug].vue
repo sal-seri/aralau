@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { PlaceDetail } from '#shared/types/place'
+import type { SeasonListItem, SeasonTocEntry } from '#shared/types/season'
+import { isDraftEntry } from '#shared/types/season'
 
+// Place page («Орын») — design 11d (before check-in: orientation, answer
+// card, locked story) / 11e (after check-in: opened story first, small
+// orientation, next-place CTA). Fully server-rendered; personalization
+// comes from `/api/places/[slug]`, fetched with the viewer's cookie.
 const { t, locale } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
@@ -28,42 +34,79 @@ if (error.value || !place.value) {
   })
 }
 
-// «Найдено · 12 марта 2026» — Almaty-timezone calendar date; deterministic
-// server↔client (same ISO in → same string) so no hydration mismatch.
-const foundDate = computed(() => {
+// Full season list — the season's 1-based TOC rank drives the roman
+// numeral and the «ед. хр.» unit, and the volume year drives the spine.
+// Same key as the title/season pages: shared payload.
+const { data: seasons } = await useAsyncData('seasons:list', () =>
+  $fetch<SeasonTocEntry[]>('/api/seasons')
+)
+
+// 1-based rank across ALL seasons (drafts included), like the title TOC.
+const seasonRank = computed(() => {
+  const current = place.value?.season.slug
+  const index = (seasons.value ?? []).findIndex((entry) => entry.slug === current)
+  return index === -1 ? 1 : index + 1
+})
+
+const seasonRoman = computed(() => toRoman(seasonRank.value))
+const placeRoman = computed(() => toRoman(place.value?.order ?? 1))
+const unit = computed(() => String(seasonRank.value).padStart(2, '0'))
+
+const visibleSeasons = computed<SeasonListItem[]>(() =>
+  (seasons.value ?? []).filter((entry): entry is SeasonListItem => !isDraftEntry(entry))
+)
+
+const year = computed(() => volumeYear(visibleSeasons.value))
+
+const statusWord = computed(() => {
+  const status = place.value?.season.status
+  if (status === 'active') return t('season.status.active')
+  if (status === 'closed') return t('season.status.closed')
+  return t('seasons.status.frozen')
+})
+
+// closed|frozen — the season is over: no answer card, just a muted note.
+const settled = computed(() => {
+  const status = place.value?.season.status
+  return status === 'closed' || status === 'frozen'
+})
+
+const spine = computed(() =>
+  t('place.spine', {
+    season: seasonRoman.value,
+    place: placeRoman.value,
+    year: year.value
+  })
+)
+
+const footerLeft = computed(() => {
+  const base = t('place.footerUnit', { unit: unit.value, place: placeRoman.value })
+  return place.value?.viewer.found ? `${base} · ${t('place.found')}` : base
+})
+
+// «мөр» row (11d/11e): «пустое место» before the check-in, the full
+// Almaty date-and-time of the stamp after it.
+const stampValue = computed(() => {
   const p = place.value
   return p?.viewer.found && p.viewer.checkedInAt
-    ? formatCheckedInDate(p.viewer.checkedInAt, locale.value)
-    : ''
+    ? formatStampDateTime(p.viewer.checkedInAt, locale.value)
+    : t('place.meta.stampEmpty')
 })
 
-// Whether the form (real interactive UI) should render — only when the
-// viewer is signed in, has not yet found this place, and the season is
-// still active. Closed / frozen / found states are handled by their own
-// branches below.
-const showRealForm = computed(() => {
-  const p = place.value
-  return !!p && loggedIn.value && !p.viewer.found && p.season.status === 'active'
+// Header stamp mark (11e): ring text and chip date, Almaty day.
+const stampRing = computed(() =>
+  t('stamp.ring', { season: seasonRoman.value, place: placeRoman.value }).toUpperCase()
+)
+const stampDay = computed(() => {
+  const checkedInAt = place.value?.viewer.checkedInAt
+  return checkedInAt ? formatStampDay(checkedInAt) : ''
 })
 
-// Anonymous users see the same form UI but as a "sign in to check in" wall:
-// the wall fires on input focus or submit. We render the form whenever the
-// user is anonymous AND not found (any season status — even closed ones
-// funnel anonymous readers through the wall first).
-const showAnonymousWall = computed(() => {
+// The answer card renders for anyone not-yet-found while the season is
+// still active — the anonymous wall and the signed-in stub share it.
+const showForm = computed(() => {
   const p = place.value
-  return !!p && !loggedIn.value && !p.viewer.found
-})
-
-// Signed-in + not-found + non-active season → no form, just a muted note.
-const showSeasonClosed = computed(() => {
-  const p = place.value
-  return (
-    !!p &&
-    loggedIn.value &&
-    !p.viewer.found &&
-    (p.season.status === 'closed' || p.season.status === 'frozen')
-  )
+  return !!p && !p.viewer.found && !settled.value
 })
 
 // Pre-built wall target in the active locale. `route.fullPath` carries the
@@ -76,6 +119,11 @@ const loginUrl = computed(() => {
     path: '/auth/login',
     query: { redirect: redirectTarget }
   })
+})
+
+const nextRoman = computed(() => {
+  const next = place.value?.nextPlace
+  return next ? toRoman(next.order) : ''
 })
 
 usePageSeo({
@@ -91,73 +139,106 @@ usePageSeo({
 </script>
 
 <template>
-  <section v-if="place">
-    <!-- 1. Header — eyebrow + serif title + back to season -->
-    <NuxtLink
-      :to="localePath(`/seasons/${place.season.slug}`)"
-      class="text-sm font-bold tracking-wide text-ink-soft uppercase transition-colors hover:text-ink"
-    >
-      ← {{ t('places.backToSeason') }}
-    </NuxtLink>
-    <p class="mt-4 text-xs font-bold tracking-wider uppercase text-ink-soft">
-      {{ place.season.title }}
-    </p>
-    <h1 class="mt-1.5 font-serif text-2xl font-bold leading-tight text-ink">
-      {{ place.title }}
-    </h1>
-
-    <!-- 2. How to find — public, visible to everyone -->
-    <h2 class="mt-10 font-serif text-xl font-bold text-ink">
-      {{ t('places.orientTitle') }}
-    </h2>
-    <p class="mt-3 leading-relaxed whitespace-pre-line text-ink">{{ place.orientText }}</p>
-
-    <!-- 3. Check-in — state-dependent -->
-    <h2 class="mt-10 font-serif text-xl font-bold text-ink">
-      {{ t('places.checkinTitle') }}
-    </h2>
-
-    <!-- 3D: found (any season) — date in Almaty timezone, no form -->
-    <div
-      v-if="place.viewer.found"
-      class="mt-3 rounded-lg border border-ink/15 bg-paper-dim px-4 py-3"
-    >
-      <p class="text-sm font-bold text-ink">
-        {{ t('places.found') }}<span v-if="foundDate"> · {{ foundDate }}</span>
-      </p>
+  <BookPage
+    v-if="place"
+    :spine="spine"
+    :footer-left="footerLeft"
+    :footer-right="t('place.footerPage')"
+  >
+    <!-- Header (11d/11e): back link, eyebrow + serif title, stamp slot -->
+    <div class="px-[22px] pt-[22px]">
+      <NuxtLink
+        :to="localePath(`/seasons/${place.season.slug}`)"
+        class="font-mono text-[9.5px] tracking-[0.16em] text-faint uppercase no-underline hover:text-ink"
+      >
+        {{ t('place.backToSeason') }}
+      </NuxtLink>
+      <div class="mt-5 flex items-start gap-3">
+        <div class="min-w-0 flex-1">
+          <p class="font-mono text-[9.5px] tracking-[0.3em] text-faint uppercase">
+            {{ place.season.title }} · {{ placeRoman }}
+          </p>
+          <h1
+            class="mt-3.5 font-serif text-[28px] leading-[1.1] font-normal tracking-[-0.015em] text-ink"
+          >
+            {{ place.title }}
+          </h1>
+        </div>
+        <StampSlot
+          v-if="!place.viewer.found"
+          :line1="t('place.stamp')"
+          :line2="t('place.emptySpot')"
+        />
+        <div v-else class="flex-none rotate-[-5deg] opacity-[0.92]">
+          <StampMark :size="96" :ring="stampRing" :date="stampDay" />
+        </div>
+      </div>
     </div>
 
-    <!-- 3C: signed-in + not found + closed/frozen — muted note, no form -->
-    <p v-else-if="showSeasonClosed" class="mt-3 text-sm text-ink-soft">
-      {{ t('places.seasonClosed') }}
-    </p>
+    <MetaTable class="mx-[22px] mt-[22px]">
+      <MetaRow :label="t('place.meta.season')" :value="`${seasonRoman} · ${statusWord}`" />
+      <MetaRow :label="t('place.meta.unit')" :value="`${unit} / ${placeRoman}`" />
+      <MetaRow
+        separated
+        :label="t('place.meta.stamp')"
+        :value="stampValue"
+        tone="accent"
+      />
+    </MetaTable>
 
-    <!-- 3A/3B: anonymous wall OR signed-in active stub form -->
-    <CheckInForm
-      v-else-if="showRealForm || showAnonymousWall"
-      :question="place.question"
-      :logged-in="loggedIn"
-      :login-url="loginUrl"
-      class="mt-3"
-    />
+    <div class="px-[22px]">
+      <!-- Before check-in (11d): orientation, answer card, locked story -->
+      <template v-if="!place.viewer.found">
+        <SectionHeader class="mt-[30px]" :label="t('place.orient')" />
+        <p class="prose-book mt-3.5">{{ place.orientText }}</p>
 
-    <!-- 4. Story — locked (placeholder) or unlocked (storyText) -->
-    <h2 class="mt-10 font-serif text-xl font-bold text-ink">
-      {{ t('places.storyTitle') }}
-    </h2>
+        <SectionHeader class="mt-[30px]" :label="t('place.confirm')" />
+        <CheckInForm
+          v-if="showForm"
+          :question="place.question"
+          :logged-in="loggedIn"
+          :login-url="loginUrl"
+        />
+        <p
+          v-else
+          class="mt-3.5 text-pretty font-serif text-[13px] italic leading-[1.65] text-muted"
+        >
+          {{ t('place.seasonClosed') }}
+        </p>
 
-    <div
-      v-if="place.viewer.found && place.storyText"
-      class="mt-3 font-serif text-[1.0625rem] leading-[1.7] text-ink whitespace-pre-line"
-    >
-      {{ place.storyText }}
+        <SectionHeader class="mt-[30px]" :label="t('place.story')" />
+        <div
+          class="mt-3.5 flex flex-col items-center gap-[9px] border border-dashed border-[rgba(34,30,23,0.35)] px-4 py-[22px] text-center"
+        >
+          <span class="font-mono text-[9px] tracking-[0.22em] text-placeholder uppercase">
+            {{ t('place.storyLocked') }}
+          </span>
+          <span class="font-serif text-[13.5px] italic leading-[1.6] text-muted">
+            {{ t('place.storyLockedText') }}
+          </span>
+          <span class="mt-1 h-px w-full bg-[rgba(34,30,23,0.15)]"></span>
+          <span class="h-px w-full bg-[rgba(34,30,23,0.12)]"></span>
+          <span class="h-px w-[66%] bg-[rgba(34,30,23,0.1)]"></span>
+        </div>
+      </template>
+
+      <!-- After check-in (11e): the story moves FIRST, orientation
+           shrinks, next place closes the page -->
+      <template v-else>
+        <SectionHeader class="mt-[30px]" :label="t('place.story')" />
+        <p class="prose-book prose-book--story dropcap mt-3.5">{{ place.storyText }}</p>
+
+        <SectionHeader class="mt-[30px]" :label="t('place.orient')" />
+        <p class="prose-book prose-book--small mt-3.5">{{ place.orientText }}</p>
+
+        <CtaButton
+          v-if="place.nextPlace"
+          class="mt-[22px]"
+          variant="outline"
+          :to="localePath(`/places/${place.nextPlace.slug}`)"
+          :label="t('place.next', { roman: nextRoman })"
+        />
+      </template>
     </div>
-
-    <p
-      v-else
-      class="mt-3 rounded-lg border border-ink/10 bg-paper-dim px-4 py-5 text-sm text-ink-soft"
-    >
-      {{ t('places.storyLocked') }}
-    </p>
-  </section>
+  </BookPage>
 </template>

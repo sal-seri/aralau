@@ -50,6 +50,16 @@
     text-align: start;
   }
 
+  /* Opened place story (11e): a notch above the kit default, initial 44px. */
+  .prose-book--story {
+    font-size: 15.5px;
+    line-height: 1.75;
+  }
+
+  .prose-book--story.dropcap::first-letter {
+    font-size: 44px;
+  }
+
   /* Raised accent initial for the opening paragraph of a section. */
   .dropcap::first-letter {
     float: left;

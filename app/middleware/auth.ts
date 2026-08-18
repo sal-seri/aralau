@@ -1,4 +1,4 @@
-// Named middleware for session-required pages (/profile, /passport).
+// Named middleware for session-required pages (/profile).
 export default defineNuxtRouteMiddleware((to) => {
   const { loggedIn } = useUserSession()
   if (!loggedIn.value) {

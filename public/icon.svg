@@ -1,11 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Aralau placeholder: stamp-circle motif, ink on paper -->
-  <rect width="512" height="512" fill="#F4EFE6"/>
-  <!-- perforated outer ring (48 dots) -->
-  <circle cx="256" cy="256" r="196" fill="none" stroke="#211D18" stroke-width="10" stroke-linecap="round" stroke-dasharray="1.2 24.4563"/>
-  <!-- inner ring -->
-  <circle cx="256" cy="256" r="168" fill="none" stroke="#211D18" stroke-width="8"/>
-  <!-- stamped A -->
-  <path d="M186 328 L256 178 L326 328" fill="none" stroke="#B3392C" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M224 284 L288 284" fill="none" stroke="#B3392C" stroke-width="22" stroke-linecap="round"/>
+  <!-- Aralau stamp motif: ink rings, accent hatch core, paper chip -->
+  <defs>
+    <pattern id="hatch" width="19.2" height="19.2" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="19.2" height="19.2" fill="#EBE3CE"/>
+      <rect width="6.4" height="19.2" fill="rgba(154,66,54,0.28)"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="#EBE3CE"/>
+  <circle cx="256" cy="256" r="202" fill="none" stroke="#221E17" stroke-width="10"/>
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#221E17" stroke-width="4"/>
+  <circle cx="256" cy="256" r="142" fill="none" stroke="#221E17" stroke-width="4"/>
+  <circle cx="256" cy="256" r="88" fill="url(#hatch)"/>
+  <circle cx="256" cy="256" r="54" fill="#EBE3CE"/>
+  <path d="M226 288 L256 220 L286 288" fill="none" stroke="#9A4236" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M237 265 L275 265" fill="none" stroke="#9A4236" stroke-width="14" stroke-linecap="round"/>
 </svg>
