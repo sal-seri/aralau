@@ -106,6 +106,21 @@ export default defineNuxtConfig({
     workbox: {
       globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,json}'],
       cleanupOutdatedCaches: true,
+      // A new SW build must take over open tabs immediately — otherwise a
+      // stale worker keeps intercepting navigations (and serving cached
+      // auth state) until the tab is fully closed or hard-reloaded.
+      skipWaiting: true,
+      clientsClaim: true,
+      // @vite-pwa/nuxt defaults this to "/" when unset, which makes
+      // generateSW precache the root document and register a
+      // NavigationRoute bound to that single frozen snapshot — registered
+      // ahead of the runtimeCaching navigate rule below, so it wins for
+      // every `/` request and replays stale auth state forever (only a
+      // SW-bypassing hard reload shows the real page). `null` disables it
+      // for a production build (the module only backfills a default when
+      // the key is entirely absent). The `/offline` fallback below already
+      // covers the offline case without ever caching real page content.
+      navigateFallback: null,
       runtimeCaching: [
         {
           urlPattern: '/api/',
@@ -126,7 +141,15 @@ export default defineNuxtConfig({
       installPrompt: true
     },
     devOptions: {
-      enabled: true
+      // In dev, @vite-pwa/nuxt re-forces navigateFallback to "/" via `??`
+      // (`null` is nullish, so the setting above cannot disable it here),
+      // and the resulting precacheAndRoute("/") serves the root document
+      // cache-first from a snapshot frozen at service-worker build time —
+      // replaying whatever auth state was current then, until a
+      // SW-bypassing hard reload. Running no worker in dev avoids that
+      // entirely; set this to true only to deliberately test PWA
+      // behaviour, and expect stale-state noise while it is on.
+      enabled: false
     }
   },
   i18n: {
