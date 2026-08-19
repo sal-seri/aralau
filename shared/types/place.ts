@@ -5,7 +5,7 @@
 // state: the API includes it ONLY when `viewer.found === true`, so the
 // field is declared optional. The contract is enforced by the API route's
 // explicit `select` whitelist (see `server/api/places/[slug].get.ts`).
-import type { PublicSeasonStatus } from './season'
+import type { PublicSeasonStatus, StampPlacement } from './season'
 
 export interface PlaceViewerState {
   found: boolean
@@ -40,3 +40,22 @@ export interface PlaceDetail {
   // Present (incl. null) only when `viewer.found === true`; omitted otherwise.
   storyText?: string | null
 }
+
+// `POST /api/places/[slug]/checkin` payload. A wrong guess never reveals
+// match details — just whether the per-minute rate-limit window has calls
+// left. A right guess (fresh or already-found) always carries a resolved
+// stamp placement and the unlocked story.
+export interface CheckinWrongResult {
+  correct: false
+  attemptsLeft: number
+}
+
+export interface CheckinSuccessResult {
+  correct: true
+  alreadyFound: boolean
+  checkedInAt: string
+  stamp: StampPlacement
+  storyText: string | null
+}
+
+export type CheckinResult = CheckinWrongResult | CheckinSuccessResult

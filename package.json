@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "nuxt typecheck",
-    "verify": "npm run lint && npm run typecheck && npm run build",
+    "test": "vitest run",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
@@ -55,6 +56,7 @@
     "sharp": "^0.35.3",
     "tsx": "^4.23.12",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.11",
     "vue-tsc": "^3.3.9"
   }
 }

@@ -10,6 +10,9 @@ const buckets = new Map<string, number[]>()
 export interface RateLimitResult {
   allowed: boolean
   retryAfterSec: number
+  // Remaining calls allowed in the current window, after this one. 0 when
+  // this call itself was rejected.
+  remaining: number
 }
 
 export function checkRateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
@@ -21,7 +24,7 @@ export function checkRateLimit(key: string, limit: number, windowMs: number): Ra
     buckets.set(key, hits)
     const oldest = hits[0] ?? now
     const retryAfterSec = Math.max(1, Math.ceil((oldest + windowMs - now) / 1000))
-    return { allowed: false, retryAfterSec }
+    return { allowed: false, retryAfterSec, remaining: 0 }
   }
 
   hits.push(now)
@@ -33,7 +36,7 @@ export function checkRateLimit(key: string, limit: number, windowMs: number): Ra
     }
   }
 
-  return { allowed: true, retryAfterSec: 0 }
+  return { allowed: true, retryAfterSec: 0, remaining: Math.max(0, limit - hits.length) }
 }
 
 export function getClientIp(event: H3Event): string {
