@@ -50,7 +50,7 @@ function onSubmit() {
 </script>
 
 <template>
-  <form class="mt-3.5 border-strong p-4" @submit.prevent="onSubmit">
+  <form class="mt-3.5 border border-[rgba(34,30,23,0.5)] p-4" @submit.prevent="onSubmit">
     <p class="text-pretty font-serif text-[16px] leading-[1.6] text-ink">
       {{ question }}
     </p>

@@ -23,34 +23,45 @@ const oauthError = computed(() => route.query.error === 'google')
 </script>
 
 <template>
-  <section class="space-y-6">
-    <div>
-      <h1 class="text-2xl font-bold">{{ t('auth.login.title') }}</h1>
+  <BookPage :spine="t('auth.login.spine')" footer-left="aralau.kz" :footer-right="t('auth.login.footerPage')">
+    <div class="px-[22px] pt-[56px] text-center">
+      <p class="font-mono text-[9.5px] tracking-[0.3em] text-faint uppercase">
+        {{ t('title.eyebrow') }}
+      </p>
+      <h1
+        class="mt-[26px] font-serif text-[28px] leading-[1.15] font-normal tracking-[-0.01em] text-ink"
+      >
+        {{ t('auth.login.title') }}
+      </h1>
+      <div class="mx-auto mt-[22px] h-px w-[46px] bg-[rgba(34,30,23,0.5)]"></div>
     </div>
 
-    <p
-      v-if="oauthError"
-      class="rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent"
-      role="alert"
-    >
-      {{ t('auth.login.errorGoogle') }}
-    </p>
+    <div class="px-[22px] mt-[38px]">
+      <p
+        v-if="oauthError"
+        role="alert"
+        class="mb-4 text-pretty text-center font-serif text-[13px] italic leading-[1.65] text-accent"
+      >
+        {{ t('auth.login.errorGoogle') }}
+      </p>
 
-    <a
-      :href="googleDisabled ? undefined : googleUrl"
-      :aria-disabled="googleDisabled || googleLoading ? 'true' : undefined"
-      class="flex min-h-[48px] w-full items-center justify-center rounded-lg border border-ink/20 bg-paper-input px-4 text-sm font-bold text-ink transition-colors"
-      :class="
-        googleDisabled || googleLoading
-          ? 'pointer-events-none cursor-not-allowed opacity-50'
-          : 'hover:border-ink/40 hover:bg-paper'
-      "
-    >
-      {{ t('auth.login.google') }}
-    </a>
+      <a
+        :href="googleDisabled ? undefined : googleUrl"
+        :aria-disabled="googleDisabled || googleLoading ? 'true' : undefined"
+        class="flex min-h-[54px] w-full items-center justify-between px-4 font-mono text-[11px] uppercase tracking-[0.16em] no-underline"
+        :class="
+          googleDisabled || googleLoading
+            ? 'pointer-events-none cursor-not-allowed bg-ink text-paper opacity-40'
+            : 'bg-ink text-paper hover:bg-accent'
+        "
+      >
+        <span>{{ t('auth.login.google') }}</span>
+        <span aria-hidden="true">→</span>
+      </a>
 
-    <p v-if="googleDisabled" class="text-center text-xs text-muted">
-      {{ t('auth.login.googleDisabled') }}
-    </p>
-  </section>
+      <p v-if="googleDisabled" class="mt-3 text-pretty text-center font-serif text-[13px] italic leading-[1.65] text-muted">
+        {{ t('auth.login.googleDisabled') }}
+      </p>
+    </div>
+  </BookPage>
 </template>
