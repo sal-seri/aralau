@@ -18,7 +18,7 @@ const classes = (variant: 'primary' | 'outline') =>
     'flex min-h-[54px] w-full items-center justify-between px-4 font-mono text-[11px] uppercase tracking-[0.16em] no-underline',
     variant === 'primary'
       ? 'bg-ink text-paper hover:bg-accent'
-      : 'border border-strong bg-transparent text-ink hover:bg-ink hover:text-paper'
+      : 'border border-[rgba(34,30,23,0.5)] bg-transparent text-ink hover:bg-ink hover:text-paper'
   ].join(' ')
 </script>
 
