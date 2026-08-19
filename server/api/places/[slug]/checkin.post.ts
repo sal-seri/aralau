@@ -46,6 +46,7 @@ export default defineEventHandler(async (event): Promise<CheckinResult> => {
     },
     select: {
       id: true,
+      seasonId: true,
       order: true,
       storyText: true,
       answers: true,
@@ -104,7 +105,21 @@ export default defineEventHandler(async (event): Promise<CheckinResult> => {
     return { correct: false, attemptsLeft: minuteLimit.remaining }
   }
 
-  const placement = generateStampPlacement(randomUUID())
+  // Stamps already on this reader's sheet for the season, resolved to
+  // concrete coords, so the new one can avoid overlapping them too much.
+  const seasonCheckIns = await prisma.checkIn.findMany({
+    where: { userId: sessionUser.id, location: { seasonId: location.seasonId } },
+    select: {
+      id: true,
+      stampLeft: true,
+      stampTop: true,
+      stampRot: true,
+      location: { select: { order: true } }
+    }
+  })
+  const occupied = seasonCheckIns.map((checkIn) => resolvePlacement(checkIn, checkIn.location.order))
+
+  const placement = generateStampPlacement(randomUUID(), occupied)
 
   try {
     const checkIn = await prisma.$transaction((tx) =>

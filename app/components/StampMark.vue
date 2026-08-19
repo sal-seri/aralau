@@ -1,29 +1,38 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 // The stamp artwork itself. Rotation/opacity/position are applied by the
-// parent wrapper — this component only renders the mark at `size` px.
+// parent wrapper — this component only renders the mark, sized either to a
+// literal `size` px (default) or to 100% of its parent box when
+// `containerRelative` is set (the parent then controls the actual px size,
+// e.g. via a percentage width — see the season stamp sheet, which must
+// scale with its own fluid-width container instead of a fixed px budget).
 // Unique textPath id per instance (useId) so several stamps can share a page.
-const props = withDefaults(
+withDefaults(
   defineProps<{
     date: string
     ring: string
     size?: number
+    containerRelative?: boolean
   }>(),
-  { size: 104 }
+  { size: 104, containerRelative: false }
 )
 
 const ringPathId = `stamp-ring-${useId()}`
 
-// Design: hatch core is 62px at 104 / 58px at 96 — 60% of the mark.
-const coreSize = computed(() => Math.round(props.size * 0.6))
-// Date chip reads 7px at 104 / 6.5px at 96.
-const dateFontSize = computed(() => Math.round(((props.size * 7) / 104) * 10) / 10)
+// The core hatch circle (60%) and date chip (≈6.73% of the mark, i.e. 7px
+// at a 104px mark) are proportions of the rendered box, not of `size` —
+// expressed as `%`/`cqw` so they hold in both sizing modes above.
 </script>
 
 <template>
-  <div class="relative" :style="{ width: `${size}px`, height: `${size}px` }">
-    <svg :width="size" :height="size" viewBox="0 0 160 160" class="block" aria-hidden="true">
+  <div
+    class="relative"
+    :style="
+      containerRelative
+        ? { width: '100%', height: '100%', containerType: 'inline-size' }
+        : { width: `${size}px`, height: `${size}px`, containerType: 'inline-size' }
+    "
+  >
+    <svg width="100%" height="100%" viewBox="0 0 160 160" class="block" aria-hidden="true">
       <defs>
         <path
           :id="ringPathId"
@@ -44,17 +53,12 @@ const dateFontSize = computed(() => Math.round(((props.size * 7) / 104) * 10) / 
       </text>
     </svg>
     <div
-      class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full"
-      :style="{
-        width: `${coreSize}px`,
-        height: `${coreSize}px`,
-        background:
-          'repeating-linear-gradient(45deg, rgba(154,66,54,.28) 0 2px, transparent 2px 6px)'
-      }"
+      class="absolute left-1/2 top-1/2 flex size-[60%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full"
+      style="background: repeating-linear-gradient(45deg, rgba(154, 66, 54, 0.28) 0 2px, transparent 2px 6px)"
     >
       <span
         class="bg-paper px-[3px] py-px font-mono tracking-[0.06em] text-accent"
-        :style="{ fontSize: `${dateFontSize}px` }"
+        style="font-size: 6.73cqw"
       >
         {{ date }}
       </span>

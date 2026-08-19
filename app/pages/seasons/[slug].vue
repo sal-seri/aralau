@@ -257,21 +257,27 @@ usePageSeo({
     <div class="px-[22px]">
       <SectionHeader class="mt-[26px]" :label="t('season.sheet.title')" />
 
-      <!-- Stamp sheet with placed stamps: fixed 212px-high relative field
-           (design constraint — seasons hold ~3 places; the placement API
-           generates coords for exactly that budget). -->
-      <div v-if="stamps.length > 0" class="relative mt-3 h-[212px]">
+      <!-- Stamp sheet with placed stamps: a 346:212 field (design constraint
+           — seasons hold ~3 places; the placement API generates coords for
+           exactly that budget) that scales with the column's actual fluid
+           width instead of assuming a fixed px column — left/top/size are
+           all percentages of this box, so a stamp positioned to fit inside
+           the 346x212 design reference (server-side, incl. rotation
+           overflow — see server/utils/stampPlacement.ts) stays inside the
+           sheet at any viewport width. -->
+      <div v-if="stamps.length > 0" class="relative mt-3 aspect-[346/212] w-full">
         <div
           v-for="stamp in stamps"
           :key="stamp.locationSlug"
-          class="absolute opacity-[0.93]"
+          class="absolute aspect-square opacity-[0.93]"
           :style="{
-            left: `${stamp.left}px`,
-            top: `${stamp.top}px`,
+            left: `${(stamp.left / 346) * 100}%`,
+            top: `${(stamp.top / 212) * 100}%`,
+            width: `${(104 / 346) * 100}%`,
             transform: `rotate(${stamp.rot}deg)`
           }"
         >
-          <StampMark :size="104" :date="stamp.date" :ring="stamp.ring" />
+          <StampMark container-relative :date="stamp.date" :ring="stamp.ring" />
         </div>
       </div>
 
