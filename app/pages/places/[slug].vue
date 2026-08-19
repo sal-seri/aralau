@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PlaceDetail } from '#shared/types/place'
+import type { CheckinSuccessResult, PlaceDetail } from '#shared/types/place'
 import type { SeasonListItem, SeasonTocEntry } from '#shared/types/season'
 import { isDraftEntry } from '#shared/types/season'
 
@@ -126,6 +126,64 @@ const nextRoman = computed(() => {
   return next ? toRoman(next.order) : ''
 })
 
+// sr-only status region: unlike the error/rate-limit notes (which stay
+// inside CheckInForm's own aria-live region), a successful check-in
+// unmounts CheckInForm entirely as the page flips to 11e — so the
+// announcement lives here, on the page, where it survives that swap.
+const announcement = ref('')
+
+const prefersReducedMotion = ref(false)
+let reducedMotionQuery: MediaQueryList | null = null
+function onReducedMotionChange(event: MediaQueryListEvent) {
+  prefersReducedMotion.value = event.matches
+}
+onMounted(() => {
+  reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  prefersReducedMotion.value = reducedMotionQuery.matches
+  reducedMotionQuery.addEventListener('change', onReducedMotionChange)
+})
+onUnmounted(() => {
+  reducedMotionQuery?.removeEventListener('change', onReducedMotionChange)
+})
+
+// Gates the header stamp's reveal transition (see the template): only a
+// fresh stamp (not `alreadyFound`) animates, and only without reduced
+// motion — otherwise the swap is instant.
+const animateReveal = ref(false)
+
+function onCheckinSuccess(result: CheckinSuccessResult) {
+  if (!place.value) return
+
+  animateReveal.value = !result.alreadyFound
+
+  place.value.viewer.found = true
+  place.value.viewer.checkedInAt = result.checkedInAt
+  place.value.storyText = result.storyText
+
+  // Other pages must see this on their next visit, not their cached one.
+  // NOT this page's own `place:${slug}` key: that key's `data` ref IS
+  // `place` (the same live object we just mutated above) — clearing it
+  // would reset `place.value` to null on this still-mounted instance and
+  // blank the page we're standing on.
+  clearNuxtData('me:progress')
+  clearNuxtData(`me:checkins:${place.value.season.slug}`)
+
+  if (result.alreadyFound) return
+
+  announcement.value = t('place.found')
+  navigator.vibrate?.(30)
+  nextTick(() => {
+    window.scrollTo({ top: 0, behavior: prefersReducedMotion.value ? 'auto' : 'smooth' })
+  })
+}
+
+// A 409 mid-session: reuse the same "season closed" branch already used
+// for a season that was closed on load — flipping the status here is
+// enough, `settled`/`showForm` do the rest.
+function onSeasonClosed() {
+  if (place.value) place.value.season.status = 'closed'
+}
+
 usePageSeo({
   title: () => (place.value ? `${place.value.title} — ${place.value.season.title}` : t('meta.place.description')),
   description: () => t('meta.place.description')
@@ -145,6 +203,8 @@ usePageSeo({
     :footer-left="footerLeft"
     :footer-right="t('place.footerPage')"
   >
+    <span class="sr-only" aria-live="polite">{{ announcement }}</span>
+
     <!-- Header (11d/11e): back link, eyebrow + serif title, stamp slot -->
     <div class="px-[22px] pt-[22px]">
       <NuxtLink
@@ -164,14 +224,17 @@ usePageSeo({
             {{ place.title }}
           </h1>
         </div>
-        <StampSlot
-          v-if="!place.viewer.found"
-          :line1="t('place.stamp')"
-          :line2="t('place.emptySpot')"
-        />
-        <div v-else class="flex-none rotate-[-5deg] opacity-[0.92]">
-          <StampMark :size="96" :ring="stampRing" :date="stampDay" />
-        </div>
+        <Transition name="stamp-reveal" :css="animateReveal && !prefersReducedMotion">
+          <StampSlot
+            v-if="!place.viewer.found"
+            key="slot"
+            :line1="t('place.stamp')"
+            :line2="t('place.emptySpot')"
+          />
+          <div v-else key="mark" class="stamp-wrap">
+            <StampMark :size="96" :ring="stampRing" :date="stampDay" />
+          </div>
+        </Transition>
       </div>
     </div>
 
@@ -198,6 +261,9 @@ usePageSeo({
           :question="place.question"
           :logged-in="loggedIn"
           :login-url="loginUrl"
+          :slug="place.slug"
+          @success="onCheckinSuccess"
+          @season-closed="onSeasonClosed"
         />
         <p
           v-else
@@ -242,3 +308,26 @@ usePageSeo({
     </div>
   </BookPage>
 </template>
+
+<style scoped>
+/* Resting state for the found-header stamp, kept as plain CSS (rather
+   than Tailwind's rotate/opacity utilities) so the reveal transition
+   below can animate `transform`/`opacity` toward it without a utility
+   class fighting the transition for the same property. */
+.stamp-wrap {
+  flex: none;
+  transform: rotate(-5deg);
+  opacity: 0.92;
+}
+
+.stamp-reveal-enter-active {
+  transition:
+    transform 300ms ease-out,
+    opacity 300ms ease-out;
+}
+
+.stamp-reveal-enter-from {
+  transform: scale(1.5) rotate(0deg);
+  opacity: 0;
+}
+</style>
