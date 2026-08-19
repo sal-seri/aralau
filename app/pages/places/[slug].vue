@@ -23,7 +23,11 @@ const requestHeaders = useRequestHeaders(['cookie'])
 const { data: place, error } = await useAsyncData(
   `place:${slug.value}`,
   () => $fetch<PlaceDetail>(`/api/places/${slug.value}`, { headers: requestHeaders }),
-  { watch: [slug] }
+  // `deep: true`: onCheckinSuccess/onSeasonClosed mutate nested fields of
+  // `place.value` in place (see below) rather than reassigning it — with
+  // Nuxt's project-wide `deep: false` default this ref wouldn't track
+  // those mutations and the UI would only catch up on a full reload.
+  { watch: [slug], deep: true }
 )
 
 if (error.value || !place.value) {
